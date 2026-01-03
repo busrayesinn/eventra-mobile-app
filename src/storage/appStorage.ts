@@ -32,6 +32,7 @@ export const addPoints = async (amount: number) => {
 export const spendPoints = async (amount: number) => {
   const current = await getPoints();
   if (current < amount) return null;
+
   const updated = current - amount;
   await AsyncStorage.setItem(KEYS.points, updated.toString());
   return updated;
@@ -45,7 +46,7 @@ export const getFavorites = async (): Promise<any[]> => {
 
 export const toggleFavorite = async (event: any) => {
   const favorites = await getFavorites();
-  const exists = favorites.find((e) => e.id === event.id);
+  const exists = favorites.some((e) => e.id === event.id);
 
   const updated = exists
     ? favorites.filter((e) => e.id !== event.id)
