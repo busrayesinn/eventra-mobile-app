@@ -78,7 +78,7 @@ export default function IntroScreen({ navigation }: any) {
 
     setTimeout(async () => {
       await saveNickname(nickname);
-      navigation.replace('MainTabs');
+      navigation.replace('Onboarding');
     }, 300);
   };
 
