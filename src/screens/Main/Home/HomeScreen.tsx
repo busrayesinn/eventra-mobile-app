@@ -93,6 +93,7 @@ export default function HomeScreen() {
         if (!response.ok) throw new Error('Network error');
   
         const json = await response.json();
+        console.log(json)
         const rawEvents: EventItem[] = Array.isArray(json?.items) ? json.items : [];
   
         // Sıralama: Yakın tarih en üstte

@@ -87,7 +87,7 @@ export default function FavoritesScreen() {
       ) : (
         <FlatList
           data={favorites}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => !item  ? "" : item.id.toString()}
           renderItem={renderItem}
           // eslint-disable-next-line react-native/no-inline-styles
           contentContainerStyle={{ padding: 16 }}

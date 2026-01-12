@@ -41,6 +41,8 @@ export const spendPoints = async (amount: number) => {
 /* ---------- FAVORITES ---------- */
 export const getFavorites = async (): Promise<any[]> => {
   const data = await AsyncStorage.getItem(KEYS.favorites);
+  console.log("data: ",data);
+  
   return data ? JSON.parse(data) : [];
 };
 
@@ -57,14 +59,65 @@ export const toggleFavorite = async (event: any) => {
 };
 
 /* ---------- NOTES ---------- */
-export const getNotes = async (): Promise<string[]> => {
-  const data = await AsyncStorage.getItem(KEYS.notes);
-  return data ? JSON.parse(data) : [];
+export interface NoteItem {
+id: string;
+title: string;
+content: string;
+eventId?: number;
+eventName?: string;
+createdAt: string;
+isPinned?:boolean;
+}
+
+
+export const getNotes = async (): Promise<NoteItem[]> => {
+const data = await AsyncStorage.getItem(KEYS.notes);
+return data ? JSON.parse(data) : [];
 };
 
-export const addNote = async (note: string) => {
+
+export const saveNotes = async (notes: NoteItem[]) => {
+await AsyncStorage.setItem(KEYS.notes, JSON.stringify(notes));
+return notes;
+};
+
+
+export const addNote = async (note: NoteItem) => {
+const notes = await getNotes();
+const updated = [note, ...notes];
+await saveNotes(updated);
+await addPoints(5);
+return updated;
+};
+
+
+export const deleteNote = async (id: string) => {
+const notes = await getNotes();
+const updated = notes.filter(n => n.id !== id);
+await saveNotes(updated);
+return updated;
+};
+
+export const updateNote = async (updatedNote: NoteItem) => {
   const notes = await getNotes();
-  const updated = [...notes, note];
-  await AsyncStorage.setItem(KEYS.notes, JSON.stringify(updated));
+
+  const updated = notes.map((n) =>
+    n.id === updatedNote.id ? updatedNote : n
+  );
+
+  await saveNotes(updated);
+  return updated;
+};
+
+export const togglePinNote = async (id: string) => {
+  const notes = await getNotes();
+
+  const updated = notes.map((note) =>
+    note.id === id
+      ? { ...note, isPinned: !note.isPinned }
+      : note
+  );
+
+  await saveNotes(updated);
   return updated;
 };

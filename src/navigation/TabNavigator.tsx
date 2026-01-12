@@ -7,6 +7,8 @@ import RewardsScreen from '../screens/Main/Rewards/RewardsScreen';
 import FavoritesScreen from '../screens/Main/Favorites/FavoritesScreen';
 import NotesScreen from '../screens/Main/Notes/NotesScreen';
 import HomeStack from './HomeStack';
+import NotesStack from './NotesStack';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -36,7 +38,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen name="Anasayfa" component={HomeStack} />
       <Tab.Screen name="Favoriler" component={FavoritesScreen} />
-      <Tab.Screen name="Notlar" component={NotesScreen} />
+      <Tab.Screen name="Notlar" component={NotesStack} />
       <Tab.Screen name="Ödüller" component={RewardsScreen} />
     </Tab.Navigator>
   );

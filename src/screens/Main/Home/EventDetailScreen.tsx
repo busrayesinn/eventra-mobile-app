@@ -56,6 +56,7 @@ export default function EventDetailScreen() {
       );
 
       const json = await response.json();
+      
       const data = Array.isArray(json) ? json[0] : json;
       setEvent(data);
     } catch {

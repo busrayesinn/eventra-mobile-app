@@ -1,75 +1,172 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   FlatList,
+  TouchableOpacity,
+  Modal,
+  TextInput,
   StyleSheet,
 } from 'react-native';
-import { addNote, getNotes, addPoints } from '../../../storage/appStorage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { addNote, getNotes, NoteItem } from '../../../storage/appStorage';
 
 export default function NotesScreen() {
-  const [note, setNote] = useState('');
-  const [notes, setNotes] = useState<string[]>([]);
+  const navigation = useNavigation<any>();
 
-  useEffect(() => {
-    loadNotes();
-  }, []);
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const loadNotes = async () => {
-    const data = await getNotes();
-    setNotes(data);
-  };
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
 
-  const handleAdd = async () => {
-    if (!note.trim()) return;
-    const updated = await addNote(note);
-    await addPoints(5);
+  useFocusEffect(
+    useCallback(() => {
+      loadNotes();
+    }, [])
+  );
+
+const loadNotes = async () => {
+  const data = await getNotes();
+
+  const sorted = [...data].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return 0;
+  });
+
+  setNotes(sorted);
+};
+
+
+  const handleSave = async () => {
+    if (!title.trim() || !content.trim()) return;
+
+    const newNote: NoteItem = {
+      id: Date.now().toString(),
+      title,
+      content,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    const updated = await addNote(newNote);
     setNotes(updated);
-    setNote('');
+
+    setTitle('');
+    setContent('');
+    setModalVisible(false);
   };
+
+  const renderItem = ({ item }: { item: NoteItem }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate('NoteDetail', { note: item })}
+    >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <Text style={styles.cardTitle}>{item.title}</Text>
+          {item.isPinned && (
+      <Ionicons name="pin" size={28} color="#f1c40f" />
+    )}
+    </View>
+      <Text numberOfLines={2} style={styles.cardContent}>
+        {item.content}
+      </Text>
+      <Text style={styles.cardDate}>{item.createdAt}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Notlarım 📝</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.header}>Notlarım</Text>
+          <Text style={styles.subHeader}>
+            {notes.length} not oluşturuldu
+          </Text>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Yeni not"
-        value={note}
-        onChangeText={setNote}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleAdd}>
-        <Text style={styles.buttonText}>Ekle</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="add-circle" size={34} color="#6c5ce7" />
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={notes}
-        renderItem={({ item }) => <Text style={styles.note}>• {item}</Text>}
+        extraData={notes}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
       />
+
+      <Modal visible={modalVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Yeni Not</Text>
+
+          <TextInput
+            placeholder="Başlık"
+            style={styles.input}
+            value={title}
+            onChangeText={setTitle}
+          />
+
+          <TextInput
+            placeholder="Not içeriği"
+            style={[styles.input, { height: 120 }]}
+            multiline
+            value={content}
+            onChangeText={setContent}
+          />
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.cancel}>İptal</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleSave}>
+              <Text style={styles.save}>Kaydet</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  header: { fontSize: 24, marginBottom: 10 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  header: { fontSize: 26, fontWeight: '700' },
+  subHeader: { fontSize: 13, color: '#888' },
+
+  card: {
+    backgroundColor: '#EDE7F6',
+    borderRadius: 14,
+    padding: 14,
+    marginVertical: 8,
+    elevation: 3,
+  },
+  cardTitle: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  cardContent: { fontSize: 14, color: '#555' },
+  cardDate: { fontSize: 11, color: '#aaa', marginTop: 6 },
+
+  modalContainer: { flex: 1, padding: 20 },
+  modalTitle: { fontSize: 22, fontWeight: '700', marginBottom: 16 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: '#6200ea',
     padding: 12,
-    borderRadius: 10,
-    marginBottom: 10,
-    alignItems: 'center',
+    marginBottom: 12,
   },
-  buttonText: { color: '#fff', fontWeight: '600' },
-  note: { fontSize: 16, marginVertical: 4 },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cancel: { fontSize: 16, color: '#999' },
+  save: { fontSize: 16, color: '#6c5ce7', fontWeight: '700' },
 });
