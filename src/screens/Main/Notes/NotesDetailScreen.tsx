@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import {
   View,
@@ -9,22 +10,23 @@ import {
   ScrollView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { deleteNote, updateNote, togglePinNote} from '../../../storage/appStorage';
-
+import {
+  deleteNote,
+  updateNote,
+  togglePinNote,
+} from '../../../storage/appStorage';
 
 export default function NoteDetailScreen({ route, navigation }: any) {
   const { note } = route.params;
 
-  // 🔹 düzenleme state’leri
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
 
   const handleTogglePin = async () => {
-  await togglePinNote(note.id);
-  navigation.goBack();
+    await togglePinNote(note.id);
+    navigation.goBack();
   };
-
 
   const handleDelete = () => {
     Alert.alert('Not silinsin mi?', 'Bu işlem geri alınamaz', [
@@ -66,15 +68,15 @@ export default function NoteDetailScreen({ route, navigation }: any) {
         />
       ) : (
         <View style={detailStyles.titleRow}>
-        <Text style={detailStyles.title}>{note.title}</Text>
+          <Text style={detailStyles.title}>{note.title}</Text>
 
-        <TouchableOpacity onPress={handleTogglePin}>
+          <TouchableOpacity onPress={handleTogglePin}>
             <Ionicons
-            name={note.isPinned ? 'pin' : 'pin-outline'}
-            size={40}
-            color={note.isPinned ? '#f1c40f' : '#999'}
+              name={note.isPinned ? 'pin' : 'pin-outline'}
+              size={40}
+              color={note.isPinned ? '#f1c40f' : '#999'}
             />
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -100,8 +102,8 @@ export default function NoteDetailScreen({ route, navigation }: any) {
           {isEditing ? 'Kaydet' : 'Düzenle'}
         </Text>
       </TouchableOpacity>
-    
-        {/* <TouchableOpacity
+
+      {/* <TouchableOpacity
         style={detailStyles.pin}
         onPress={handleTogglePin}
         >
@@ -152,16 +154,15 @@ const detailStyles = StyleSheet.create({
     alignItems: 'center',
   },
   pin: {
-  marginTop: 20,
-  backgroundColor: '#f1c40f',
-  padding: 14,
-  borderRadius: 10,
-  alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: '#f1c40f',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   titleRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-
 });

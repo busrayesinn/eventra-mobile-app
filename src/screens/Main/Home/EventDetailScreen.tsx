@@ -15,7 +15,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   toggleFavorite,
   getFavorites,
-  addPoints,
+  addParticipation,
+  getParticipations,
 } from '../../../storage/appStorage';
 
 type DetailRouteProp = RouteProp<HomeStackParamList, 'EventDetail'>;
@@ -27,6 +28,9 @@ interface EventDetail {
   start?: string;
   poster_url?: string;
   is_free?: boolean;
+  category?: {
+    name?: string;
+  };
 }
 
 export default function EventDetailScreen() {
@@ -36,11 +40,13 @@ export default function EventDetailScreen() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [joined, setJoined] = useState(false);
 
   useEffect(() => {
     fetchDetail();
     checkFavorite();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    checkParticipation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDetail = async () => {
@@ -52,14 +58,12 @@ export default function EventDetailScreen() {
             'Content-Type': 'application/json',
             'X-Etkinlik-Token': TOKEN,
           },
-        }
+        },
       );
 
       const json = await response.json();
-      
       const data = Array.isArray(json) ? json[0] : json;
       setEvent(data);
-    } catch {
     } finally {
       setLoading(false);
     }
@@ -67,15 +71,31 @@ export default function EventDetailScreen() {
 
   const checkFavorite = async () => {
     const favs = await getFavorites();
-    setIsFavorite(favs.some((e) => e.id === eventId));
+    setIsFavorite(favs.some(e => e.id === eventId));
+  };
+
+  const checkParticipation = async () => {
+    const parts = await getParticipations();
+    setJoined(parts.some(p => p.eventId === eventId));
   };
 
   const handleFavorite = async () => {
     if (!event) return;
     const updated = await toggleFavorite(event);
-    const added = updated.some((e: any) => e.id === event.id);
-    setIsFavorite(added);
-    if (added) await addPoints(10);
+    setIsFavorite(updated.some(e => e.id === event.id));
+  };
+
+  const handleJoin = async () => {
+    if (!event || joined) return;
+
+    await addParticipation({
+      eventId: event.id,
+      name: event.name,
+      category: event.category?.name || 'Diğer',
+      date: new Date().toISOString(),
+    });
+
+    setJoined(true);
   };
 
   if (loading) {
@@ -128,6 +148,17 @@ export default function EventDetailScreen() {
           {event.is_free ? 'Ücretsiz 🎉' : 'Ücretli 🎟️'}
         </Text>
 
+        {/* KATILDIM */}
+        <TouchableOpacity
+          style={[styles.joinButton, joined && styles.joinedButton]}
+          onPress={handleJoin}
+          disabled={joined}
+        >
+          <Text style={styles.joinText}>
+            {joined ? 'Katıldın ✅' : 'Katıldım'}
+          </Text>
+        </TouchableOpacity>
+
         <Text style={styles.description}>
           {event.content
             ? event.content.replace(/<[^>]+>/g, '')
@@ -150,6 +181,22 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: 'bold', flex: 1 },
   date: { color: '#666', marginVertical: 6 },
   free: { marginBottom: 10, fontWeight: '600' },
+
+  joinButton: {
+    backgroundColor: '#6200ea',
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  joinedButton: {
+    backgroundColor: '#2ecc71',
+  },
+  joinText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
   description: { fontSize: 15, lineHeight: 22 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

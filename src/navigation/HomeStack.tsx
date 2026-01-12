@@ -2,10 +2,12 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/Main/Home/HomeScreen';
 import EventDetailScreen from '../screens/Main/Home/EventDetailScreen';
+import ProfileScreen from '../screens/Main/Profile/ProfileScreen';
 
 export type HomeStackParamList = {
   Home: undefined;
   EventDetail: { eventId: number };
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -23,6 +25,12 @@ export default function HomeStack() {
         name="EventDetail"
         component={EventDetailScreen}
         options={{ title: 'Etkinlik Detayı' }}
+      />
+
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: 'Profilim' }}
       />
     </Stack.Navigator>
   );

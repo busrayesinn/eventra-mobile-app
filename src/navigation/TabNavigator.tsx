@@ -1,23 +1,26 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons'; 
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { checkDailyLogin } from '../storage/appStorage';
 
 import RewardsScreen from '../screens/Main/Rewards/RewardsScreen';
 import FavoritesScreen from '../screens/Main/Favorites/FavoritesScreen';
-import NotesScreen from '../screens/Main/Notes/NotesScreen';
 import HomeStack from './HomeStack';
 import NotesStack from './NotesStack';
-
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  useEffect(() => {
+    checkDailyLogin();
+  }, []);
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#6200ea', 
+        tabBarActiveTintColor: '#6200ea',
         tabBarInactiveTintColor: 'gray',
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = '';

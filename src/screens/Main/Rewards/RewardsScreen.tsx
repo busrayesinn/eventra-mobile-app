@@ -5,145 +5,152 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ListRenderItem,
-  Alert,
+  Image,
+  Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { getPoints, spendPoints } from '../../../storage/appStorage';
-
-interface Reward {
-  id: string;
-  title: string;
-  cost: number;
-  icon: string;
-}
-
-const SAMPLE_REWARDS: Reward[] = [
-  { id: '1', title: 'Neon Lamba', cost: 150, icon: 'bulb-outline' },
-  { id: '2', title: 'Konser İndirimi', cost: 300, icon: 'ticket-outline' },
-  { id: '3', title: 'Özel Çerçeve', cost: 500, icon: 'image-outline' },
-  { id: '4', title: 'VIP Giriş', cost: 750, icon: 'star-outline' },
-  { id: '5', title: 'Sürpriz Kutu', cost: 1000, icon: 'gift-outline' },
-];
+import { getPoints, spendPoints, getStreak } from '../../../storage/appStorage';
+import { Reward, REWARDS } from '../../../data/rewardsData';
 
 export default function RewardsScreen() {
-  const [points, setPoints] = useState<number>(0);
+  const [points, setPoints] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [ownedRewards, setOwnedRewards] = useState<string[]>([]);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
-  // 🔁 Ekran her açıldığında puanı güncelle
   useFocusEffect(
     useCallback(() => {
-      loadPoints();
-    }, [])
+      loadData();
+    }, []),
   );
 
-  const loadPoints = async () => {
-    const currentPoints = await getPoints();
-    setPoints(currentPoints);
+  const loadData = async () => {
+    const p = await getPoints();
+    const s = await getStreak();
+    const owned = await AsyncStorage.getItem('ownedRewards');
+
+    setPoints(p);
+    setStreak(s);
+    setOwnedRewards(owned ? JSON.parse(owned) : []);
   };
 
-  const handleBuy = (item: Reward) => {
-    Alert.alert(
-      'Satın Alma',
-      `"${item.title}" ödülünü ${item.cost} puana almak istiyor musun?`,
-      [
-        { text: 'Vazgeç', style: 'cancel' },
-        {
-          text: 'Al',
-          onPress: async () => {
-            const updated = await spendPoints(item.cost);
+  const buyReward = async (reward: Reward) => {
+    if (reward.type !== 'SHOP') return;
+    if (ownedRewards.includes(reward.id)) return;
 
-            if (updated === null) {
-              Alert.alert(
-                'Olamaz 😔',
-                'Bu ödül için yeterli puanın yok.'
-              );
-            } else {
-              setPoints(updated);
-              Alert.alert(
-                'Başarılı 🎉',
-                `"${item.title}" artık senin!`
-              );
-            }
-          },
-        },
-      ]
-    );
+    const updated = await spendPoints(reward.cost!);
+    if (updated === null) return;
+
+    const newOwned = [...ownedRewards, reward.id];
+    await AsyncStorage.setItem('ownedRewards', JSON.stringify(newOwned));
+
+    setPoints(updated);
+    setOwnedRewards(newOwned);
+    setSelectedReward(reward);
   };
 
-  const renderRewardItem: ListRenderItem<Reward> = ({ item }) => {
-    const canAfford = points >= item.cost;
+  const renderItem = ({ item }: { item: Reward }) => {
+    const owned = ownedRewards.includes(item.id);
+
+    const isShop = item.type === 'SHOP';
+    const canAfford = isShop && points >= (item.cost ?? 0);
+
+    const isStreakLocked =
+      item.type === 'STREAK' && streak < (item.streakRequired ?? 0);
 
     return (
-      <TouchableOpacity
-        style={styles.card}
-        activeOpacity={0.8}
-        disabled={!canAfford}
-        onPress={() => handleBuy(item)}
-      >
-        <View
+      <View style={styles.card}>
+        <Image
+          source={item.image}
           style={[
-            styles.iconContainer,
-            !canAfford && styles.iconDisabled,
+            styles.rewardImage,
+            isStreakLocked && styles.imageLocked,
           ]}
-        >
-          <Ionicons
-            name={item.icon}
-            size={28}
-            color={canAfford ? '#6200ea' : '#999'}
-          />
+        />
+
+        {/* 🔒 KİLİT */}
+        {!owned && (isStreakLocked || (!canAfford && isShop)) && (
+          <View style={styles.lockOverlay}>
+            <Ionicons name="lock-closed" size={22} color="#fff" />
+          </View>
+        )}
+
+        <View style={styles.info}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.desc}>{item.description}</Text>
+
+          {/* DURUM */}
+          {owned ? (
+            <Text style={styles.ownedText}>Kazanıldı ✅</Text>
+          ) : item.type === 'SHOP' ? (
+            <Text style={styles.cost}>{item.cost} Puan</Text>
+          ) : (
+            <Text style={styles.streakReq}>
+              {item.streakRequired} gün streak gerekli
+            </Text>
+          )}
         </View>
 
-        <View style={styles.infoContainer}>
-          <Text
-            style={[
-              styles.rewardTitle,
-              !canAfford && styles.textDisabled,
-            ]}
+        {/* 🛒 AL BUTONU – SADECE SHOP */}
+        {!owned && isShop && canAfford && (
+          <TouchableOpacity
+            style={styles.buyButton}
+            onPress={() => buyReward(item)}
           >
-            {item.title}
-          </Text>
-          <Text style={styles.rewardCost}>
-            {item.cost} Puan
-          </Text>
-        </View>
-
-        <View
-          style={[
-            styles.button,
-            canAfford
-              ? styles.buttonEnabled
-              : styles.buttonDisabled,
-          ]}
-        >
-          <Text style={styles.buttonText}>
-            {canAfford ? 'AL' : '🔒'}
-          </Text>
-        </View>
-      </TouchableOpacity>
+            <Text style={styles.buyButtonText}>AL</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     );
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          Ödül Mağazası 🛍️
-        </Text>
-
-        <View style={styles.pointsContainer}>
-          <Ionicons name="diamond" size={20} color="#00e5ff" />
+        <Text style={styles.headerTitle}>Ödüller 🏆</Text>
+        <View style={styles.pointsBox}>
+          <Ionicons name="diamond" size={18} color="#00e5ff" />
           <Text style={styles.pointsText}>{points} XP</Text>
         </View>
       </View>
 
       <FlatList
-        data={SAMPLE_REWARDS}
-        keyExtractor={(item) => item.id}
-        renderItem={renderRewardItem}
-        contentContainerStyle={styles.listContent}
+        data={REWARDS}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        // eslint-disable-next-line react-native/no-inline-styles
+        contentContainerStyle={{ padding: 20 }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* 🎉 TEBRİK MODALI */}
+      <Modal visible={!!selectedReward} transparent animationType="fade">
+        <View style={styles.modalBg}>
+          <View style={styles.modalCard}>
+            {selectedReward && (
+              <>
+                <Image
+                  source={selectedReward.image}
+                  style={styles.modalImage}
+                />
+                <Text style={styles.modalTitle}>Tebrikler 🎉</Text>
+                <Text style={styles.modalText}>
+                  "{selectedReward.title}" ödülünü kazandın!
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setSelectedReward(null)}
+                >
+                  <Text style={styles.modalButtonText}>Harika!</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -157,88 +164,128 @@ const styles = StyleSheet.create({
     backgroundColor: '#6200ea',
     paddingTop: 50,
     paddingBottom: 25,
-    paddingHorizontal: 20,
+    alignItems: 'center',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    alignItems: 'center',
-    elevation: 8,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 10,
   },
-  pointsContainer: {
+  pointsBox: {
     flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: 10,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
   },
   pointsText: {
-    fontSize: 20,
-    fontWeight: 'bold',
     color: '#fff',
-    marginLeft: 8,
-  },
-  listContent: {
-    padding: 20,
+    fontWeight: 'bold',
+    marginLeft: 6,
   },
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 16,
+    flexDirection: 'row',
     elevation: 3,
   },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#f3e5f5',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
+  rewardImage: {
+    width: 64,
+    height: 64,
+    marginRight: 14,
   },
-  iconDisabled: {
-    backgroundColor: '#eee',
+  imageLocked: {
+    opacity: 0.4,
   },
-  infoContainer: {
+  info: {
     flex: 1,
   },
-  rewardTitle: {
+  title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
-  textDisabled: {
-    color: '#999',
-  },
-  rewardCost: {
-    fontSize: 14,
-    color: '#666',
+  desc: {
+    fontSize: 13,
+    color: '#777',
     marginTop: 4,
   },
-  button: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 12,
-    minWidth: 60,
-    alignItems: 'center',
+  cost: {
+    marginTop: 6,
+    fontWeight: '600',
+    color: '#6200ea',
   },
-  buttonEnabled: {
+  streakReq: {
+    marginTop: 6,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+  },
+  lockOverlay: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 6,
+  },
+  ownedText: {
+    marginTop: 6,
+    fontWeight: '600',
+    color: '#2ecc71',
+  },
+  buyButton: {
     backgroundColor: '#6200ea',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 14,
+    alignSelf: 'center',
   },
-  buttonDisabled: {
-    backgroundColor: '#e0e0e0',
-  },
-  buttonText: {
+  buyButtonText: {
     color: '#fff',
     fontSize: 12,
+    fontWeight: 'bold',
+  },
+  modalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    width: '80%',
+  },
+  modalImage: {
+    width: 90,
+    height: 90,
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalText: {
+    textAlign: 'center',
+    marginTop: 8,
+    color: '#555',
+  },
+  modalButton: {
+    marginTop: 20,
+    backgroundColor: '#6200ea',
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  modalButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });
