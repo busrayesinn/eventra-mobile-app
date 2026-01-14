@@ -25,25 +25,26 @@ import { getFavorites } from '../../../storage/appStorage';
 const PAGE_SIZE = 15;
 
 const TURKISH_CITIES = [
-  'Tümü','İstanbul','Ankara','İzmir','Adana','Adıyaman','Afyonkarahisar','Ağrı',
-  'Aksaray','Amasya','Antalya','Ardahan','Artvin','Aydın','Balıkesir','Bartın',
-  'Batman','Bayburt','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa',
-  'Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Düzce','Edirne','Elazığ',
-  'Erzincan','Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkari',
-  'Hatay','Iğdır','Isparta','Kahramanmaraş','Karabük','Karaman','Kars','Kastamonu',
-  'Kayseri','Kırıkkale','Kırklareli','Kırşehir','Kilis','Kocaeli','Konya',
-  'Kütahya','Malatya','Manisa','Mardin','Mersin','Muğla','Muş','Nevşehir',
-  'Niğde','Ordu','Osmaniye','Rize','Sakarya','Samsun','Siirt','Sinop','Sivas',
-  'Şanlıurfa','Şırnak','Tekirdağ','Tokat','Trabzon','Tunceli','Uşak','Van',
-  'Yalova','Yozgat','Zonguldak',
+  'Tümü', 'İstanbul', 'Ankara', 'İzmir', 'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı',
+  'Aksaray', 'Amasya', 'Antalya', 'Ardahan', 'Artvin', 'Aydın', 'Balıkesir', 'Bartın',
+  'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
+  'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ',
+  'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari',
+  'Hatay', 'Iğdır', 'Isparta', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu',
+  'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya',
+  'Kütahya', 'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir',
+  'Niğde', 'Ordu', 'Osmaniye', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas',
+  'Şanlıurfa', 'Şırnak', 'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van',
+  'Yalova', 'Yozgat', 'Zonguldak',
 ];
 
 const CATEGORY_FILTERS = [
   { key: 'ALL', label: '🔥 Hepsi' },
-  { key: 'FREE', label: '🎁 Ücretsiz' },
-  { key: 'EDU', label: '🎓 Eğitim' },
   { key: 'MUSIC', label: '🎵 Konser' },
   { key: 'THEATER', label: '🎭 Tiyatro' },
+  { key: 'EDU', label: '🎓 Eğitim' },
+  { key: 'FESTIVAL', label: '🎉 Festival' },
+  { key: 'FREE', label: '🎁 Ücretsiz' },
 ];
 
 const DATE_FILTERS = [
@@ -62,6 +63,7 @@ interface EventItem {
   poster_url?: string;
   venue?: { name?: string; city?: string | { name: string } };
   category?: { name?: string };
+  format?: { name?: string };
   is_free?: boolean;
 }
 
@@ -161,6 +163,7 @@ export default function HomeScreen() {
   useEffect(() => {
     let result = [...allFetchedEvents];
 
+    // 1. Şehir Filtresi
     if (activeCity !== 'Tümü') {
       result = result.filter(e => {
         const city =
@@ -171,21 +174,22 @@ export default function HomeScreen() {
       });
     }
 
-    if (activeCategory === 'FREE') result = result.filter(e => e.is_free);
-    if (activeCategory === 'EDU')
-      result = result.filter(e =>
-        e.category?.name?.toLowerCase().includes('eğitim'),
-      );
-    if (activeCategory === 'MUSIC')
-      result = result.filter(
-        e =>
-          e.category?.name?.toLowerCase().includes('müzik') ||
-          e.category?.name?.toLowerCase().includes('konser'),
-      );
-    if (activeCategory === 'THEATER')
-      result = result.filter(e =>
-        e.category?.name?.toLowerCase().includes('tiyatro'),
-      );
+    // 2. Kategori Filtresi
+    if (activeCategory === 'FREE') {
+      result = result.filter(e => e.is_free);
+    } else if (activeCategory !== 'ALL') {
+      result = result.filter(e => {
+        const catName = e.category?.name?.toLowerCase() || '';
+        const formatName = e.format?.name?.toLowerCase() || '';
+        const combined = `${catName} ${formatName}`;
+
+        if (activeCategory === 'MUSIC') return combined.includes('müzik') || combined.includes('konser');
+        if (activeCategory === 'THEATER') return combined.includes('tiyatro') || combined.includes('sahne') || combined.includes('gösteri');
+        if (activeCategory === 'EDU') return combined.includes('eğitim') || combined.includes('atölye') || combined.includes('seminer');
+        if (activeCategory === 'FESTIVAL') return combined.includes('festival');
+        return true;
+      });
+    }
 
     setFilteredEvents(result);
     setDisplayedEvents(result.slice(0, PAGE_SIZE));
@@ -222,19 +226,33 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
+  /* ---------------- EMPTY STATE ---------------- */
+
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconContainer}>
+         <Ionicons name="search-outline" size={48} color="#a29bfe" />
+      </View>
+      <Text style={styles.emptyTitle}>Etkinlik Bulunamadı</Text>
+      <Text style={styles.emptyText}>
+        Seçtiğin kriterlere uygun etkinlik yok.{'\n'}
+        Filtreleri değiştirip tekrar deneyebilirsin. 🚀
+      </Text>
+    </View>
+  );
+
   /* ---------------- RENDER ITEM ---------------- */
 
   const renderEventItem = ({ item }: { item: EventItem }) => {
     const isFav = favoriteIds.includes(item.id);
     const eventDate = parseEventDate(item.start_at);
+    const displayCategory = item.format?.name || item.category?.name || 'ETKİNLİK';
 
     return (
       <TouchableOpacity
         style={styles.card}
         activeOpacity={0.9}
-        onPress={() =>
-          navigation.navigate('EventDetail', { eventId: item.id })
-        }
+        onPress={() => navigation.navigate('EventDetail', { eventId: item.id })}
       >
         <Image
           source={{
@@ -262,12 +280,8 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.cardContent}>
-          <Text style={styles.cardCategory}>
-            {item.category?.name?.toUpperCase() || 'ETKİNLİK'}
-          </Text>
-          <Text style={styles.cardTitle} numberOfLines={2}>
-            {item.name}
-          </Text>
+          <Text style={styles.cardCategory}>{displayCategory.toUpperCase()}</Text>
+          <Text style={styles.cardTitle} numberOfLines={2}>{item.name}</Text>
           <View style={styles.locationRow}>
             <Ionicons name="location" size={14} color="#ddd" />
             <Text style={styles.locationText}>
@@ -308,8 +322,8 @@ export default function HomeScreen() {
           style={styles.profileButton}
           onPress={() => navigation.navigate('Profile')}
         >
-          <Image 
-            source={{ uri: 'https://i.pravatar.cc/300' }} 
+          <Image
+            source={{ uri: 'https://i.pravatar.cc/300' }}
             style={styles.headerAvatar}
           />
         </TouchableOpacity>
@@ -330,12 +344,7 @@ export default function HomeScreen() {
                 style={[styles.dateChip, isActive && styles.dateChipActive]}
                 onPress={() => setActiveDateFilter(item.key)}
               >
-                <Text
-                  style={[
-                    styles.dateChipText,
-                    isActive && styles.dateChipTextActive,
-                  ]}
-                >
+                <Text style={[styles.dateChipText, isActive && styles.dateChipTextActive]}>
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -356,18 +365,10 @@ export default function HomeScreen() {
             const isActive = activeCategory === item.key;
             return (
               <TouchableOpacity
-                style={[
-                  styles.categoryChip,
-                  isActive && styles.categoryChipActive,
-                ]}
+                style={[styles.categoryChip, isActive && styles.categoryChipActive]}
                 onPress={() => setActiveCategory(item.key)}
               >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    isActive && styles.categoryTextActive,
-                  ]}
-                >
+                <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -378,11 +379,7 @@ export default function HomeScreen() {
 
       {/* LIST */}
       {isLoading ? (
-        <ActivityIndicator
-          size="large"
-          color="#6c5ce7"
-          style={styles.loadingIndicator}
-        />
+        <ActivityIndicator size="large" color="#6c5ce7" style={styles.loadingIndicator} />
       ) : (
         <FlatList
           data={displayedEvents}
@@ -392,13 +389,10 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           onEndReached={loadMoreEvents}
           onEndReachedThreshold={0.5}
+          ListEmptyComponent={renderEmptyState}
           ListFooterComponent={
             isLoadingMore ? (
-              <ActivityIndicator
-                size="small"
-                color="#6c5ce7"
-                style={{ marginVertical: 20 }}
-              />
+              <ActivityIndicator size="small" color="#6c5ce7" style={{ marginVertical: 20 }} />
             ) : (
               <View style={{ height: 20 }} />
             )
@@ -425,7 +419,6 @@ export default function HomeScreen() {
                 <Ionicons name="close-circle" size={28} color="#999" />
               </TouchableOpacity>
             </View>
-
             <View style={styles.searchBox}>
               <Ionicons name="search" size={20} color="#999" />
               <TextInput
@@ -435,7 +428,6 @@ export default function HomeScreen() {
                 onChangeText={setCitySearchText}
               />
             </View>
-
             <FlatList
               data={filteredCities}
               keyExtractor={(item, index) => `${item}-${index}`}
@@ -444,20 +436,11 @@ export default function HomeScreen() {
                   style={styles.cityItem}
                   onPress={() => handleCitySelect(item)}
                 >
-                  <Text
-                    style={[
-                      styles.cityText,
-                      activeCity === item && styles.cityTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.cityText, activeCity === item && styles.cityTextActive]}>
                     {item}
                   </Text>
                   {activeCity === item && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color="#6c5ce7"
-                    />
+                    <Ionicons name="checkmark-circle" size={20} color="#6c5ce7" />
                   )}
                 </TouchableOpacity>
               )}
@@ -469,11 +452,8 @@ export default function HomeScreen() {
   );
 }
 
-/* ================== STYLES ================== */
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-
   header: {
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 20 : 60,
@@ -482,31 +462,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
   greeting: { fontSize: 14, color: '#888', marginBottom: 4 },
-
   locationSelector: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-
   activeCityText: { fontSize: 20, fontWeight: '700', color: '#2d3436' },
-
-  profileButton: { 
-    paddingLeft: 12,
-  },
-
+  profileButton: { paddingLeft: 12 },
   headerAvatar: {
     width: 42,
     height: 42,
     borderRadius: 21,
     borderWidth: 2,
-    borderColor: '#6c5ce7', 
+    borderColor: '#6c5ce7',
   },
-
   dateFilterContainer: { marginBottom: 10 },
-
   horizontalListPadding: { paddingHorizontal: 20 },
-
   categoryContainer: { marginBottom: 10, height: 40 },
-
   categoryChip: {
     paddingVertical: 6,
     paddingHorizontal: 14,
@@ -518,13 +487,9 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: 'center',
   },
-
   categoryChipActive: { backgroundColor: '#6c5ce7', borderColor: '#6c5ce7' },
-
   categoryText: { fontSize: 13, fontWeight: '600', color: '#636e72' },
-
   categoryTextActive: { color: '#fff' },
-
   dateChip: {
     paddingVertical: 6,
     paddingHorizontal: 14,
@@ -534,16 +499,11 @@ const styles = StyleSheet.create({
     height: 34,
     justifyContent: 'center',
   },
-
   dateChipActive: { backgroundColor: '#2d3436' },
-
   dateChipText: { fontSize: 13, fontWeight: '500', color: '#636e72' },
-
   dateChipTextActive: { color: '#fff' },
-
   loadingIndicator: { marginTop: 50 },
-
-  listContent: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10 },
+  listContent: { paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10, minHeight: 300 }, // minHeight eklendi ki boş liste ortalansın
 
   card: {
     backgroundColor: '#000',
@@ -557,11 +517,8 @@ const styles = StyleSheet.create({
     elevation: 5,
     overflow: 'hidden',
   },
-
   cardImage: { width: '100%', height: '100%', resizeMode: 'cover', opacity: 0.8 },
-
   cardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
-
   dateBadge: {
     position: 'absolute',
     top: 15,
@@ -573,11 +530,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 50,
   },
-
   dateDay: { fontSize: 18, fontWeight: 'bold', color: '#2d3436' },
-
   dateMonth: { fontSize: 10, fontWeight: '700', color: '#6c5ce7' },
-
   favoriteBadge: {
     position: 'absolute',
     top: 15,
@@ -586,11 +540,8 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 50,
   },
-
   cardContent: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20 },
-
   cardCategory: { color: '#a29bfe', fontSize: 12, fontWeight: '700', marginBottom: 4 },
-
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -600,21 +551,39 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
-
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-
   locationText: { color: '#ddd', fontSize: 13, fontWeight: '500' },
 
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 80 },
-
-  emptyText: { marginTop: 16, fontSize: 16, color: '#888', textAlign: 'center' },
-
-  emptyLink: { marginTop: 12, fontSize: 15, color: '#6c5ce7', fontWeight: '600' },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 60,
+    paddingHorizontal: 30,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f1f2f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2d3436',
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 
   modalContainer: { flex: 1, justifyContent: 'flex-end' },
-
   modalOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
-
   modalContent: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
@@ -622,11 +591,8 @@ const styles = StyleSheet.create({
     height: height * 0.75,
     padding: 20,
   },
-
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-
   modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#2d3436' },
-
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -636,9 +602,7 @@ const styles = StyleSheet.create({
     height: 46,
     marginBottom: 16,
   },
-
   searchInput: { flex: 1, marginLeft: 8, fontSize: 16, color: '#333' },
-
   cityItem: {
     paddingVertical: 16,
     borderBottomWidth: 1,
@@ -647,8 +611,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
   cityText: { fontSize: 16, color: '#2d3436' },
-
   cityTextActive: { color: '#6c5ce7', fontWeight: 'bold' },
 });

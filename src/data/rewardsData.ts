@@ -17,6 +17,14 @@ export interface Reward {
 
 export const REWARDS: Reward[] = [
   {
+    id: 'r0', // sunumda gostermek icin 0 puanlik ornek veri
+    title: 'Işıltılı Bir Hayat',
+    description: 'Bu ışıltılı hayatı sen seçtin✨',
+    type: 'SHOP',
+    cost: 0,
+    image: require('../assets/rewards/rozet8.png'),
+  },
+  {
     id: 'r1',
     title: 'Etkinlik Gurmesi',
     description: 'Bu kültür işinde bayağı iyisin dostum.',
@@ -55,6 +63,22 @@ export const REWARDS: Reward[] = [
     type: 'SHOP',
     cost: 800,
     image: require('../assets/rewards/rozet6.png'),
+  },
+  {
+    id: 'r6',
+    title: 'Işıltılı Bir Hayat',
+    description: 'Bu ışıltılı hayatı sen seçtin✨',
+    type: 'SHOP',
+    cost: 800,
+    image: require('../assets/rewards/rozet8.png'),
+  },
+  {
+    id: 'r7',
+    title: 'Hedefine Bağlı',
+    description: "Hedefi tam 12'den vurdun",
+    type: 'SHOP',
+    cost: 800,
+    image: require('../assets/rewards/rozet7.png'),
   },
 
   /* =========================

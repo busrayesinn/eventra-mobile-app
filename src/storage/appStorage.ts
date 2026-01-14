@@ -12,6 +12,23 @@ const KEYS = {
   participations: 'participations',
 };
 
+const getTodayKey = () => {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+};
+
+const canGiveDailyPoint = async (type: 'note' | 'favorite') => {
+  const key = `daily_${type}_point_${getTodayKey()}`;
+  const value = await AsyncStorage.getItem(key);
+  return !value;
+};
+
+const markDailyPointGiven = async (type: 'note' | 'favorite') => {
+  const key = `daily_${type}_point_${getTodayKey()}`;
+  await AsyncStorage.setItem(key, 'true');
+};
+
+/* ================= USER ================= */
+
 export const saveNickname = async (nickname: string) => {
   await AsyncStorage.setItem(KEYS.nickname, nickname);
 };
@@ -59,12 +76,20 @@ export const toggleFavorite = async (event: any) => {
     : [...favorites, event];
 
   await AsyncStorage.setItem(KEYS.favorites, JSON.stringify(updated));
-  
-  // EĞER LİSTEYE YENİ EKLENDİYSE (ÇIKARILMADIYSA)
-  if (!exists) {
-    await addPoints(5);
 
-    showToast('Favorilere Eklendi ❤️', '+5 Puan kazandın! Etkinlik kaydedildi.');
+  // SADECE EKLEMEDE + GÜNLÜK 1 KEZ PUAN
+  if (!exists) {
+    const canGive = await canGiveDailyPoint('favorite');
+
+    if (canGive) {
+      await addPoints(5);
+      await markDailyPointGiven('favorite');
+
+      showToast(
+        'Favorilere Eklendi ❤️',
+        'Bugünün ilk favorisi! +5 Puan kazandın.',
+      );
+    }
   }
 
   return updated;
@@ -96,10 +121,19 @@ export const addNote = async (note: NoteItem) => {
   const notes = await getNotes();
   const updated = [note, ...notes];
   await saveNotes(updated);
-  
-  await addPoints(5);
 
-  showToast('Tebrikler! 🎉', 'Not ekledin ve +5 Puan kazandın!');
+  // GÜNLÜK 1 KEZ PUAN
+  const canGive = await canGiveDailyPoint('note');
+
+  if (canGive) {
+    await addPoints(5);
+    await markDailyPointGiven('note');
+
+    showToast(
+      'Tebrikler! 🎉',
+      'Bugünün ilk notunu ekledin ve +5 Puan kazandın!',
+    );
+  }
 
   return updated;
 };
@@ -141,7 +175,7 @@ const addRewardIfNotOwned = async (rewardId: string) => {
       KEYS.ownedRewards,
       JSON.stringify(owned),
     );
-    
+
     showToast('🏆 Yeni Rozet!', 'Başarın kilidi açıldı, profiline bak!');
   }
 };
@@ -165,11 +199,12 @@ export const checkDailyLogin = async (): Promise<number> => {
   await AsyncStorage.setItem(KEYS.streak, streak.toString());
   await AsyncStorage.setItem(KEYS.lastLoginDate, today);
 
-  // GÜNLÜK GİRİŞ PUANI + BİLDİRİM
   await addPoints(10);
-  showToast(`Günlük Giriş Başarılı 🔥`, `Streak: ${streak} Gün | +10 Puan Kazandın`);
+  showToast(
+    `Günlük Giriş Başarılı 🔥`,
+    `Streak: ${streak} Gün | +10 Puan Kazandın`,
+  );
 
-  // STREAK ROZETLERİ
   if (streak === 10) await addRewardIfNotOwned('streak10');
   if (streak === 20) await addRewardIfNotOwned('streak20');
   if (streak === 30) await addRewardIfNotOwned('streak30');
@@ -187,7 +222,7 @@ export const getStreak = async (): Promise<number> => {
 export interface Participation {
   eventId: number;
   name: string;
-  category: string; 
+  category: string;
   date: string;
 }
 
@@ -210,7 +245,7 @@ export const addParticipation = async (p: Participation) => {
     JSON.stringify(updated),
   );
 
-  await addPoints(20); 
+  await addPoints(20);
   showToast('Etkinliğe Katıldın! 🎟️', '+20 Puan hesabına eklendi!');
 
   return updated;
