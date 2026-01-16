@@ -1,97 +1,245 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<div align="center">
+  <img src="screenshots/logo.png" width="220"
+       style="background:#f2f3f7; padding:16px; border-radius:16px;" />
+</div>
 
-# Getting Started
+<div align="center">
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+### Oyunlaştırma Destekli Mobil Etkinlik Keşif ve Takip Uygulaması
 
-## Step 1: Start Metro
+![Course](https://img.shields.io/badge/Course-Mobile%20Programming-6c5ce7?style=for-the-badge)
+![University](https://img.shields.io/badge/Bursa%20Technical%20University-BTU-2d3436?style=for-the-badge)
+![React Native](https://img.shields.io/badge/React%20Native-Stable-61dafb?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-Enabled-3178c6?style=for-the-badge&logo=typescript)
+![Gamification](https://img.shields.io/badge/Gamification-Enabled-6c5ce7?style=for-the-badge)
+![Streak](https://img.shields.io/badge/Streak%20System-Active-ff7675?style=for-the-badge)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+> **Kullanıcıyı etkinlik keşfine teşvik eden,<br>
+oyunlaştırma temelli mobil etkinlik deneyimi.**
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+</div>
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
+## 📌 İçindekiler
+- [Proje Hakkında](#-proje-hakkında)
+- [Motivasyon ve Problem Tanımı](#-motivasyon-ve-problem-tanımı)
+- [Temel Özellikler](#-temel-özellikler)
+- [Uygulama Mimarisi](#-uygulama-mimarisi)
+- [Oyunlaştırma Sistemi](#-oyunlaştırma-sistemi)
+- [Veri Yönetimi](#-veri-yönetimi)
+- [Ekran Görüntüleri](#-ekran-görüntüleri)
+- [Kurulum & Çalıştırma](#-kurulum--çalıştırma)
+- [Kullanılan Teknolojiler](#-kullanılan-teknolojiler)
+- [Akademik Not](#-akademik-not)
+- [Geliştiriciler](#-geliştiriciler)
+
+---
+
+## 📖 Proje Hakkında
+
+**Eventra**, kullanıcıların bulundukları şehirdeki güncel etkinlikleri
+keşfetmelerini, bu etkinliklerle etkileşime geçmelerini ve düzenli
+kullanım alışkanlığı kazanmalarını amaçlayan bir **mobil etkinlik keşif
+uygulamasıdır**.
+
+Uygulama; klasik etkinlik listeleme yaklaşımını,
+**puan, streak ve rozet mekanikleri** ile destekleyerek
+kullanıcı deneyimini oyunlaştırılmış bir yapıya dönüştürür.
+
+---
+
+## 🎯 Motivasyon ve Problem Tanımı
+
+Mevcut etkinlik platformlarının büyük bir kısmı:
+
+- Kullanıcıyı pasif içerik tüketicisi konumunda bırakır  
+- Düzenli kullanım için teşvik mekanizması sunmaz  
+
+Eventra’nın temel motivasyonu:
+
+- Kullanıcıyı **aktif katılıma teşvik etmek**
+- Etkinlik deneyimini **kişiselleştirmek**
+- Uygulamaya geri dönüşü **oyunlaştırma** ile desteklemektir
+
+---
+
+## ✨ Temel Özellikler
+
+- 📍 Şehir, kategori ve tarih bazlı etkinlik filtreleme  
+- ❤️ Etkinlikleri favorilere ekleme / çıkarma  
+- 📝 Etkinliklere özel kişisel notlar oluşturma  
+- ✅ Etkinliğe katılım bildirimi  
+- 🔥 Günlük giriş (streak) takibi  
+- 🏆 Puan, rozet ve ödül sistemi  
+- 👤 Kullanıcı profili ve istatistik ekranı  
+
+---
+
+## 🏗️ Uygulama Mimarisi
+
+<p align="center">
+  <img src="screenshots/hiyerarsi.png"
+       alt="Eventra Uygulama Hiyerarşisi"
+       width="800"/>
+</p>
+
+Eventra, **React Navigation** kullanılarak oluşturulmuş  
+**Stack ve Bottom Tab** navigasyonlarının birlikte kullanıldığı
+modüler bir mimariye sahiptir.
+
+Bu mimari yapı, uygulama içi navigasyonun yanı sıra
+veri sürekliliğini sağlamak amacıyla **AsyncStorage**
+kullanımıyla desteklenmiştir.
+
+Kullanıcıya ait streak, puan, son giriş tarihi ve
+favori verileri cihaz üzerinde güvenli şekilde
+saklanmaktadır.
+
+### Navigasyon Yapısı
+- **Root Stack**
+  - Intro
+  - Onboarding
+  - MainTabs
+- **Bottom Tab Navigation**
+  - Anasayfa (Stack)
+  - Favoriler
+  - Notlar (Stack)
+  - Ödüller
+
+---
+
+## 🏆 Oyunlaştırma Sistemi
+
+### 🔥 Günlük Streak Mekaniği
+- Günlük uygulama girişleri takip edilir  
+- Bir gün giriş yapılmazsa streak sıfırlanır  
+- Streak, özel rozetlerin kilidini açar  
+
+<p align="center">
+  <img src="screenshots/streak10.png" width="70"/>
+  <img src="screenshots/streak20.png" width="70"/>
+  <img src="screenshots/streak30.png" width="70"/>
+</p>
+
+---
+
+### 🎖 Rozet ve Ödüller
+
+<p align="center">
+  <img src="screenshots/rozet1.png" width="60"/>
+  <img src="screenshots/rozet2.png" width="60"/>
+  <img src="screenshots/rozet3.png" width="60"/>
+  <img src="screenshots/rozet4.png" width="60"/>
+  <img src="screenshots/rozet5.png" width="60"/>
+</p>
+
+**Ödül Türleri**
+- **STREAK** → Günlük kullanım başarımına bağlı  
+- **SHOP** → Puan harcanarak satın alınan ödüller  
+
+---
+
+## 💾 Veri Yönetimi
+
+AsyncStorage ile saklanan veriler:
+- Kullanıcı takma adı  
+- Favoriler  
+- Notlar  
+- Katılım geçmişi  
+- Toplam puan  
+- Günlük streak  
+- Son giriş tarihi (last login)  
+- Kazanılan rozetler  
+
+Son giriş tarihi, günlük streak mekanizmasının
+adil ve doğru çalışmasını sağlamak amacıyla
+kullanılmaktadır.
+
+---
+
+## 📸 Ekran Görüntüleri
+
+### Giriş & Onboarding
+<p align="center">
+  <img src="screenshots/intro.png" width="80"/>
+  <img src="screenshots/onboarding.png" width="80"/>
+</p>
+
+### Ana Akış
+<p align="center">
+  <img src="screenshots/home.png" width="80"/>
+  <img src="screenshots/profile.png" width="80"/>
+  <img src="screenshots/event_detail.png" width="80"/>
+</p>
+
+### Kullanıcı Etkileşimi
+<p align="center">
+  <img src="screenshots/favorites.png" width="80"/>
+  <img src="screenshots/notes.png" width="80"/>
+</p>
+
+### Oyunlaştırma
+<p align="center">
+  <img src="screenshots/rewards.png" width="80"/>
+</p>
+
+---
+
+## 🚀 Kurulum & Çalıştırma
+
+### Gereksinimler
+- Node.js (LTS)
+- npm veya yarn
+- Android Studio (Android SDK & Emulator)
+- React Native CLI
+
+### Kurulum
+
+```bash
+git clone https://github.com/busrayesinn/eventra-mobile-app.git
+cd eventra
+npm install
+````
+
+### Ortam Değişkenleri
+
+Proje kök dizininde `.env` dosyası oluşturun:
+
+```env
+ETKINLIK_API_KEY=YOUR_API_KEY   # Etkinlik.io API anahtarı
 ```
 
-## Step 2: Build and run your app
+### Android için Çalıştırma
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```bash
+npx react-native run-android
 ```
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 🧰 Kullanılan Teknolojiler
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+* React Native
+* TypeScript
+* React Navigation
+* AsyncStorage
+* React Native Reanimated
+* Ionicons
+* Etkinlik.io REST API
 
-```sh
-bundle install
-```
+---
 
-Then, and every time you update your native dependencies, run:
+## 📘 Akademik Not
 
-```sh
-bundle exec pod install
-```
+Bu proje,
+**Bursa Teknik Üniversitesi – Bilgisayar Mühendisliği** bölümünde yürütülen
+**Mobil Programlama** dersi kapsamında geliştirilmiştir.
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+---
 
-```sh
-# Using npm
-npm run ios
+## 👩‍💻 Geliştiriciler
 
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+* **Büşra Yesin**
+* **Beyza Kahraman**
+* **Ece Açar**
