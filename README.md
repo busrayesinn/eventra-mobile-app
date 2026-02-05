@@ -21,22 +21,22 @@ oyunlaştırma temelli mobil etkinlik deneyimi.**
 
 ---
 
-## 📌 İçindekiler
-- [Proje Hakkında](#-proje-hakkında)
-- [Motivasyon ve Problem Tanımı](#-motivasyon-ve-problem-tanımı)
-- [Temel Özellikler](#-temel-özellikler)
-- [Uygulama Mimarisi](#-uygulama-mimarisi)
-- [Oyunlaştırma Sistemi](#-oyunlaştırma-sistemi)
-- [Veri Yönetimi](#-veri-yönetimi)
-- [Ekran Görüntüleri](#-ekran-görüntüleri)
-- [Kurulum & Çalıştırma](#-kurulum--çalıştırma)
-- [Kullanılan Teknolojiler](#-kullanılan-teknolojiler)
-- [Akademik Not](#-akademik-not)
-- [Geliştiriciler](#-geliştiriciler)
+## İçindekiler
+- [Proje Hakkında](#proje-hakkında)
+- [Motivasyon ve Problem Tanımı](#motivasyon-ve-problem-tanımı)
+- [Temel Özellikler](#temel-özellikler)
+- [Uygulama Mimarisi](#uygulama-mimarisi)
+- [Oyunlaştırma Sistemi](#oyunlaştırma-sistemi)
+- [Veri Yönetimi](#veri-yonetimi)
+- [Ekran Görüntüleri](#ekran-goruntuleri)
+- [Kurulum & Çalıştırma](#kurulum--calistirma)
+- [Kullanılan Teknolojiler](#kullanilan-teknolojiler)
+- [Akademik Not](#akademik-not)
+- [Geliştiriciler](#gelistiriciler)
 
 ---
 
-## 📖 Proje Hakkında
+## Proje Hakkında
 
 **Eventra**, kullanıcıların bulundukları şehirdeki güncel etkinlikleri
 keşfetmelerini, bu etkinliklerle etkileşime geçmelerini ve düzenli
@@ -49,7 +49,7 @@ kullanıcı deneyimini oyunlaştırılmış bir yapıya dönüştürür.
 
 ---
 
-## 🎯 Motivasyon ve Problem Tanımı
+## Motivasyon ve Problem Tanımı
 
 Mevcut etkinlik platformlarının büyük bir kısmı:
 
@@ -64,19 +64,19 @@ Eventra’nın temel motivasyonu:
 
 ---
 
-## ✨ Temel Özellikler
+## Temel Özellikler
 
-- 📍 Şehir, kategori ve tarih bazlı etkinlik filtreleme  
-- ❤️ Etkinlikleri favorilere ekleme / çıkarma  
-- 📝 Etkinliklere özel kişisel notlar oluşturma  
-- ✅ Etkinliğe katılım bildirimi  
-- 🔥 Günlük giriş (streak) takibi  
-- 🏆 Puan, rozet ve ödül sistemi  
-- 👤 Kullanıcı profili ve istatistik ekranı  
+- Şehir, kategori ve tarih bazlı etkinlik filtreleme  
+- Etkinlikleri favorilere ekleme / çıkarma  
+- Etkinliklere özel kişisel notlar oluşturma  
+- Etkinliğe katılım bildirimi  
+- Günlük giriş (streak) takibi  
+- Puan, rozet ve ödül sistemi  
+- Kullanıcı profili ve istatistik ekranı  
 
 ---
 
-## 🏗️ Uygulama Mimarisi
+## Uygulama Mimarisi
 
 <p align="center">
   <img src="screenshots/hiyerarsi.png"
@@ -109,38 +109,67 @@ saklanmaktadır.
 
 ---
 
-## 🏆 Oyunlaştırma Sistemi
+## Oyunlaştırma Sistemi
 
-### 🔥 Günlük Streak Mekaniği
+### Günlük Streak Mekaniği
 - Günlük uygulama girişleri takip edilir  
 - Bir gün giriş yapılmazsa streak sıfırlanır  
 - Streak, özel rozetlerin kilidini açar  
 
 <p align="center">
-  <img src="screenshots/streak10.png" width="70"/>
-  <img src="screenshots/streak20.png" width="70"/>
-  <img src="screenshots/streak30.png" width="70"/>
+  <img src="assets/streak10.png" width="70"/>
+  <img src="assets/streak20.png" width="70"/>
+  <img src="assets/streak30.png" width="70"/>
 </p>
 
 ---
 
-### 🎖 Rozet ve Ödüller
+### Rozet ve Ödüller
 
 <p align="center">
-  <img src="screenshots/rozet1.png" width="60"/>
-  <img src="screenshots/rozet2.png" width="60"/>
-  <img src="screenshots/rozet3.png" width="60"/>
-  <img src="screenshots/rozet4.png" width="60"/>
-  <img src="screenshots/rozet5.png" width="60"/>
+  <img src="assets/rozet1.png" width="60"/>
+  <img src="assets/rozet2.png" width="60"/>
+  <img src="assets/rozet3.png" width="60"/>
+  <img src="assets/rozet4.png" width="60"/>
+  <img src="assets/rozet5.png" width="60"/>
 </p>
 
 **Ödül Türleri**
 - **STREAK** → Günlük kullanım başarımına bağlı  
 - **SHOP** → Puan harcanarak satın alınan ödüller  
 
+### Puan Kazanma Mantığı
+
+Uygulama içerisinde kullanıcı etkileşimleri,
+**kontrollü ve adil bir puan sistemi** ile ödüllendirilmektedir.
+
+Puanlama kuralları aşağıdaki gibidir:
+
+* **Günlük giriş (streak)**
+  * Her gün ilk girişte **+10 puan**
+  * Aynı gün tekrar girişte puan verilmez
+
+* **Favori ekleme**
+  * Gün içinde yapılan **ilk favori ekleme** için **+5 puan**
+  * Aynı gün içinde eklenen diğer favoriler puan kazandırmaz
+
+* **Not ekleme**
+  * Gün içinde eklenen **ilk not** için **+5 puan**
+  * Aynı gün içinde eklenen diğer notlar puan kazandırmaz
+
+* **Etkinliğe katılım bildirimi**
+  * Her etkinlik için **tek seferlik +20 puan**
+  * Aynı etkinlik tekrar eklenemez
+
+Bu yapı sayesinde:
+
+* Rastgele puan kasılması engellenir
+* Günlük kullanım teşvik edilir
+* Oyunlaştırma mekanizması dengeli şekilde çalışır
+
 ---
 
-## 💾 Veri Yönetimi
+## Veri Yönetimi
 
 AsyncStorage ile saklanan veriler:
 - Kullanıcı takma adı  
@@ -149,21 +178,17 @@ AsyncStorage ile saklanan veriler:
 - Katılım geçmişi  
 - Toplam puan  
 - Günlük streak  
-- Son giriş tarihi (last login)  
+- Son giriş tarihi  
 - Kazanılan rozetler  
-
-Son giriş tarihi, günlük streak mekanizmasının
-adil ve doğru çalışmasını sağlamak amacıyla
-kullanılmaktadır.
 
 ---
 
-## 📸 Ekran Görüntüleri
+## Ekran Görüntüleri
 
 ### Giriş & Onboarding
 <p align="center">
-  <img src="screenshots/intro.png" width="80"/>
-  <img src="screenshots/onboarding.png" width="80"/>
+  <img src="screenshots/intro.jpg" width="80"/>
+  <img src="screenshots/onboarding.jpg" width="80"/>
 </p>
 
 ### Ana Akış
@@ -186,12 +211,12 @@ kullanılmaktadır.
 
 ---
 
-## 🚀 Kurulum & Çalıştırma
+## Kurulum & Çalıştırma
 
 ### Gereksinimler
 - Node.js (LTS)
 - npm veya yarn
-- Android Studio (Android SDK & Emulator)
+- Android Studio
 - React Native CLI
 
 ### Kurulum
@@ -204,10 +229,8 @@ npm install
 
 ### Ortam Değişkenleri
 
-Proje kök dizininde `.env` dosyası oluşturun:
-
 ```env
-ETKINLIK_API_KEY=YOUR_API_KEY   # Etkinlik.io API anahtarı
+ETKINLIK_API_KEY=YOUR_API_KEY
 ```
 
 ### Android için Çalıştırma
@@ -218,7 +241,7 @@ npx react-native run-android
 
 ---
 
-## 🧰 Kullanılan Teknolojiler
+## Kullanılan Teknolojiler
 
 * React Native
 * TypeScript
@@ -230,7 +253,7 @@ npx react-native run-android
 
 ---
 
-## 📘 Akademik Not
+## Akademik Not
 
 Bu proje,
 **Bursa Teknik Üniversitesi – Bilgisayar Mühendisliği** bölümünde yürütülen
@@ -238,7 +261,7 @@ Bu proje,
 
 ---
 
-## 👩‍💻 Geliştiriciler
+## Gelistiriciler
 
 * **Büşra Yesin**
 * **Beyza Kahraman**
