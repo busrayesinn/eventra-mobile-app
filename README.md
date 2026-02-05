@@ -21,18 +21,18 @@ oyunlaştırma temelli mobil etkinlik deneyimi.**
 
 ---
 
-## İçindekiler
-- [Proje Hakkında](#proje-hakkında)
-- [Motivasyon ve Problem Tanımı](#motivasyon-ve-problem-tanımı)
-- [Temel Özellikler](#temel-özellikler)
-- [Uygulama Mimarisi](#uygulama-mimarisi)
-- [Oyunlaştırma Sistemi](#oyunlaştırma-sistemi)
-- [Veri Yönetimi](#veri-yonetimi)
-- [Ekran Görüntüleri](#ekran-goruntuleri)
-- [Kurulum & Çalıştırma](#kurulum--calistirma)
-- [Kullanılan Teknolojiler](#kullanilan-teknolojiler)
-- [Akademik Not](#akademik-not)
-- [Geliştiriciler](#gelistiriciler)
+## 📌 İçindekiler
+- [Proje Hakkında](#-proje-hakkında)
+- [Motivasyon ve Problem Tanımı](#-motivasyon-ve-problem-tanımı)
+- [Temel Özellikler](#-temel-özellikler)
+- [Uygulama Mimarisi](#-uygulama-mimarisi)
+- [Oyunlaştırma Sistemi](#-oyunlaştırma-sistemi)
+- [Veri Yönetimi](#-veri-yönetimi)
+- [Ekran Görüntüleri](#-ekran-görüntüleri)
+- [Kurulum & Çalıştırma](#-kurulum--çalıştırma)
+- [Kullanılan Teknolojiler](#-kullanılan-teknolojiler)
+- [Akademik Not](#-akademik-not)
+- [Geliştiriciler](#-geliştiriciler)
 
 ---
 
@@ -117,9 +117,9 @@ saklanmaktadır.
 - Streak, özel rozetlerin kilidini açar  
 
 <p align="center">
-  <img src="assets/streak10.png" width="70"/>
-  <img src="assets/streak20.png" width="70"/>
-  <img src="assets/streak30.png" width="70"/>
+  <img src="screenshots/streak10.png" width="70"/>
+  <img src="screenshots/streak20.png" width="70"/>
+  <img src="screenshots/streak30.png" width="70"/>
 </p>
 
 ---
@@ -127,11 +127,11 @@ saklanmaktadır.
 ### Rozet ve Ödüller
 
 <p align="center">
-  <img src="assets/rozet1.png" width="60"/>
-  <img src="assets/rozet2.png" width="60"/>
-  <img src="assets/rozet3.png" width="60"/>
-  <img src="assets/rozet4.png" width="60"/>
-  <img src="assets/rozet5.png" width="60"/>
+  <img src="screenshots/rozet1.png" width="60"/>
+  <img src="screenshots/rozet2.png" width="60"/>
+  <img src="screenshots/rozet3.png" width="60"/>
+  <img src="screenshots/rozet4.png" width="60"/>
+  <img src="screenshots/rozet5.png" width="60"/>
 </p>
 
 **Ödül Türleri**
@@ -230,7 +230,7 @@ npm install
 ### Ortam Değişkenleri
 
 ```env
-ETKINLIK_API_KEY=YOUR_API_KEY
+ETKINLIK_API_KEY=YOUR_API_KEY   # Etkinlik.io API anahtarı
 ```
 
 ### Android için Çalıştırma
